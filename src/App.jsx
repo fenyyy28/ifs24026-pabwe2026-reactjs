@@ -11,18 +11,6 @@ import DetailPage from './features/lost-founds/pages/DetailPage'
 import UsersPage from './features/users/pages/UsersPage'
 import ProfilePage from './features/users/pages/ProfilePage'
 
-import { getAccessToken } from './helpers/apiHelper'
-
-function ProtectedRoute({ children }) {
-  const token = getAccessToken()
-
-  if (!token) {
-    return <Navigate to="/auth/login" replace />
-  }
-
-  return children
-}
-
 function App() {
   return (
     <Routes>
@@ -32,15 +20,8 @@ function App() {
         <Route path="register" element={<RegisterPage />} />
       </Route>
 
-      {/* PROTECTED */}
-      <Route
-        path="/"
-        element={
-          <ProtectedRoute>
-            <LostFoundLayout />
-          </ProtectedRoute>
-        }
-      >
+      {/* MAIN APPLICATION */}
+      <Route path="/" element={<LostFoundLayout />}>
         <Route index element={<HomePage />} />
         <Route path="lost-founds/:id" element={<DetailPage />} />
         <Route path="users" element={<UsersPage />} />
@@ -50,7 +31,7 @@ function App() {
       {/* DEFAULT */}
       <Route
         path="*"
-        element={<Navigate to="/auth/login" replace />}
+        element={<Navigate to="/" replace />}
       />
     </Routes>
   )

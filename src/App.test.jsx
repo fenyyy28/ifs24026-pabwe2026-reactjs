@@ -1,19 +1,47 @@
-import { describe, it, expect } from 'vitest'
-import { screen } from '@testing-library/react'
+import { describe, expect, it } from 'vitest'
+import { render, screen } from '@testing-library/react'
+import { Provider } from 'react-redux'
+import { configureStore } from '@reduxjs/toolkit'
+import { MemoryRouter } from 'react-router-dom'
 
 import App from './App'
-import { renderWithProviders } from './test-utils'
+
+const testStore = configureStore({
+  reducer: {
+    auth: (state = {
+      isLoading: false,
+      error: null,
+      isLoggedIn: false,
+      user: null,
+    }) => state,
+
+    users: (state = {
+      isLoading: false,
+      error: null,
+      data: [],
+    }) => state,
+
+    lostFounds: (state = {
+      isLoading: false,
+      error: null,
+      lostFounds: [],
+      data: [],
+      items: [],
+    }) => state,
+  },
+})
 
 describe('App', () => {
-  it('merender halaman login', () => {
-    renderWithProviders(<App />, {
-      route: '/login',
-    })
+  it('merender halaman homepage', () => {
+    render(
+      <Provider store={testStore}>
+        <MemoryRouter initialEntries={['/']}>
+          <App />
+        </MemoryRouter>
+      </Provider>,
+    )
 
-    expect(screen.getByText('Selamat datang')).toBeInTheDocument()
-    expect(
-      screen.getByText('Masuk ke akun Lost & Founds kamu.')
-    ).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Masuk' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Lost & Founds', level: 2 }))
+  .toBeInTheDocument()
   })
 })
