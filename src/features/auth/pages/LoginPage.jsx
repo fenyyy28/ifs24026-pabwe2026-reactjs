@@ -9,10 +9,7 @@ export default function LoginPage() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const {
-    isLoading,
-    error,
-  } = useSelector((state) => state.auth)
+  const { isLoading, error } = useSelector((state) => state.auth)
 
   const [form, setForm] = useState({
     email: '',
@@ -40,7 +37,7 @@ export default function LoginPage() {
 
     if (!form.email.trim()) {
       newErrors.email = 'Email wajib diisi.'
-    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = 'Format email tidak valid.'
     }
 
@@ -80,7 +77,7 @@ export default function LoginPage() {
         </h2>
 
         <p className="mt-2 text-gray-500">
-          Masuk ke akun Lost & Founds kamu.
+          Masuk ke akun Lost &amp; Founds kamu.
         </p>
       </div>
 
@@ -88,17 +85,23 @@ export default function LoginPage() {
         onSubmit={handleSubmit}
         className="space-y-5"
       >
+        {/* Email */}
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="login-email-input"
+            className="mb-2 block text-sm font-semibold text-gray-700"
+          >
             Email
           </label>
 
           <input
+            id="login-email-input"
             type="email"
             name="email"
             value={form.email}
             onChange={handleChange}
             placeholder="nama@email.com"
+            autoComplete="email"
             className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
           />
 
@@ -109,17 +112,23 @@ export default function LoginPage() {
           )}
         </div>
 
+        {/* Password */}
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="login-password-input"
+            className="mb-2 block text-sm font-semibold text-gray-700"
+          >
             Password
           </label>
 
           <input
+            id="login-password-input"
             type="password"
             name="password"
             value={form.password}
             onChange={handleChange}
             placeholder="Masukkan password"
+            autoComplete="current-password"
             className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none transition focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
           />
 
@@ -130,7 +139,9 @@ export default function LoginPage() {
           )}
         </div>
 
+        {/* Tombol Login */}
         <button
+          id="login-submit-button"
           type="submit"
           disabled={isLoading}
           className="w-full rounded-xl bg-yellow-400 px-4 py-3 font-bold text-yellow-950 transition hover:bg-yellow-500 disabled:cursor-not-allowed disabled:opacity-60"
@@ -141,8 +152,9 @@ export default function LoginPage() {
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Belum punya akun?{' '}
+
         <Link
-          to="/register"
+          to="/auth/register"
           className="font-bold text-yellow-600 hover:text-yellow-700"
         >
           Daftar sekarang
