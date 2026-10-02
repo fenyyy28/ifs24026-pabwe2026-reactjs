@@ -1,18 +1,11 @@
-import { Navigate, Outlet } from 'react-router-dom'
+import { Outlet } from 'react-router-dom'
 import { useState } from 'react'
 
 import NavbarComponent from '../components/NavbarComponent'
 import SidebarComponent from '../components/SidebarComponent'
-import { getAccessToken } from '../../../helpers/apiHelper'
 
 function LostFoundLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
-  const token = getAccessToken()
-
-  if (!token) {
-    return <Navigate to="/auth/login" replace />
-  }
 
   return (
     <div className="min-h-screen bg-gray-50">
