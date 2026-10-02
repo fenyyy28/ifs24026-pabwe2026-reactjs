@@ -82,7 +82,7 @@ function NavbarComponent({
             onClick={onLogout}
             aria-label="Keluar dari akun"
             title="Keluar dari akun"
-            className="rounded-xl p-2.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
+            className="rounded-xl p-2.5 text-slate-500 hover:bg-red-50 hover:text-red-700"
           >
             <IconLogout
               size={20}

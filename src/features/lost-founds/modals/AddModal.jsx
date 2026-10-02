@@ -85,7 +85,7 @@ function AddModal({ open, onClose, onSubmit, loading }) {
                 onClick={() => setStatus('lost')}
                 className={`rounded-xl border p-3 text-sm font-bold ${
                   status === 'lost'
-                    ? 'border-red-300 bg-red-50 text-red-600'
+                    ? 'border-red-300 bg-red-50 text-red-700'
                     : 'border-slate-200 text-slate-500'
                 }`}
               >

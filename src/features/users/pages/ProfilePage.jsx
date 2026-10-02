@@ -199,7 +199,7 @@ export default function ProfilePage() {
   if (error && !profile) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-yellow-50 p-6">
-        <div className="rounded-2xl bg-red-50 p-6 text-red-600">
+        <div className="rounded-2xl bg-red-50 p-6 text-red-700">
           {error}
         </div>
       </main>
@@ -210,7 +210,7 @@ export default function ProfilePage() {
     <main className="min-h-screen bg-yellow-50 p-6">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
-          <p className="text-sm font-semibold uppercase tracking-wide text-yellow-600">
+          <p className="text-sm font-semibold uppercase tracking-wide text-yellow-800">
             Akun
           </p>
 

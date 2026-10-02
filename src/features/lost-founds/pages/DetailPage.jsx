@@ -157,7 +157,7 @@ function DetailPage() {
             <span
               className={`absolute left-5 top-5 rounded-full px-4 py-2 text-sm font-bold ${
                 lostFound.status === 'lost'
-                  ? 'bg-red-100 text-red-600'
+                  ? 'bg-red-100 text-red-700'
                   : 'bg-green-100 text-green-600'
               }`}
             >
@@ -215,7 +215,7 @@ function DetailPage() {
                 <button
                   onClick={handleDelete}
                   disabled={loadingDelete}
-                  className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-600 hover:bg-red-100 disabled:opacity-50"
+                  className="inline-flex items-center gap-2 rounded-xl bg-red-50 px-4 py-2.5 text-sm font-bold text-red-700 hover:bg-red-100 disabled:opacity-50"
                 >
                   <IconTrash size={18} />
                   Hapus
