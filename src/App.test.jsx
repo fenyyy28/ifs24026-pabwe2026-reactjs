@@ -1,38 +1,42 @@
-import { describe, expect, it } from 'vitest'
+import { configureStore } from '@reduxjs/toolkit'
 import { render, screen } from '@testing-library/react'
 import { Provider } from 'react-redux'
-import { configureStore } from '@reduxjs/toolkit'
 import { MemoryRouter } from 'react-router-dom'
+import { describe, expect, it } from 'vitest'
 
 import App from './App'
 
 const testStore = configureStore({
   reducer: {
     auth: (state = {
-      isLoading: false,
-      error: null,
-      isLoggedIn: false,
+      token: null,
       user: null,
+      isLoading: false,
+      isAuthLogin: false,
+      isAuthRegister: false,
     }) => state,
 
     users: (state = {
+      users: [],
+      user: null,
       isLoading: false,
-      error: null,
-      data: [],
     }) => state,
 
     lostFounds: (state = {
-      isLoading: false,
-      error: null,
       lostFounds: [],
-      data: [],
-      items: [],
+      lostFound: null,
+      isProfile: false,
+      isLoading: false,
+      isLostFoundAdd: false,
+      isLostFoundChange: false,
+      isLostFoundChangeCover: false,
+      isLostFoundDelete: false,
     }) => state,
   },
 })
 
 describe('App', () => {
-  it('merender halaman homepage', () => {
+  it('merender halaman homepage', async () => {
     render(
       <Provider store={testStore}>
         <MemoryRouter initialEntries={['/']}>
@@ -41,7 +45,11 @@ describe('App', () => {
       </Provider>,
     )
 
-    expect(screen.getByRole('heading', { name: 'Lost & Founds', level: 2 }))
-  .toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', {
+        name: 'Lost & Founds',
+        level: 2,
+      }),
+    ).toBeInTheDocument()
   })
 })

@@ -1,12 +1,20 @@
-import Swal from 'sweetalert2'
+/**
+ * Memuat SweetAlert2 hanya ketika dialog benar-benar dibutuhkan.
+ */
+async function getSwal() {
+  const module = await import('sweetalert2')
+  return module.default
+}
 
 /**
  * Menampilkan dialog sukses.
  */
-export function showSuccessDialog(
+export async function showSuccessDialog(
   message = 'Data berhasil disimpan.',
   title = 'Berhasil',
 ) {
+  const Swal = await getSwal()
+
   return Swal.fire({
     icon: 'success',
     title,
@@ -18,10 +26,12 @@ export function showSuccessDialog(
 /**
  * Menampilkan dialog error.
  */
-export function showErrorDialog(
+export async function showErrorDialog(
   message = 'Terjadi kesalahan.',
   title = 'Error',
 ) {
+  const Swal = await getSwal()
+
   return Swal.fire({
     icon: 'error',
     title,
@@ -39,6 +49,8 @@ export async function showConfirmDialog(
   message = 'Apakah Anda yakin ingin melanjutkan?',
   title = 'Konfirmasi',
 ) {
+  const Swal = await getSwal()
+
   const result = await Swal.fire({
     icon: 'warning',
     title,
