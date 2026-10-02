@@ -155,7 +155,7 @@ export default function LoginPage() {
 
         <Link
           to="/auth/register"
-          className="font-bold text-yellow-600 hover:text-yellow-700"
+     className="font-bold text-yellow-800 hover:text-yellow-900"
         >
           Daftar sekarang
         </Link>

@@ -27,12 +27,11 @@ function SidebarComponent({ open, onClose }) {
 
   return (
     <>
-      {/* Overlay untuk mobile */}
       {open && (
         <div
           className="fixed inset-0 z-40 bg-black/40 lg:hidden"
           onClick={onClose}
-        />
+        ></div>
       )}
 
       <aside
@@ -41,12 +40,14 @@ function SidebarComponent({ open, onClose }) {
         }`}
       >
         <div className="flex h-full flex-col">
+          
           {/* Logo */}
           <div className="flex h-20 items-center border-b px-6">
             <div>
-              <h1 className="text-xl font-bold text-yellow-500">
-                Lost & Founds
+              <h1 className="text-xl font-bold text-yellow-800">
+                Lost &amp; Founds
               </h1>
+
               <p className="text-xs text-gray-500">
                 Delcom Information System
               </p>
@@ -55,7 +56,7 @@ function SidebarComponent({ open, onClose }) {
 
           {/* Menu */}
           <nav className="flex-1 px-4 py-6">
-            <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-gray-400">
+            <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-gray-500">
               Menu
             </p>
 
@@ -68,29 +69,34 @@ function SidebarComponent({ open, onClose }) {
                   className={({ isActive }) =>
                     `flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition ${
                       isActive
-                        ? 'bg-yellow-400 text-white shadow-md'
-                        : 'text-gray-600 hover:bg-yellow-50 hover:text-yellow-600'
+                        ? 'bg-yellow-400 text-yellow-950 shadow-md'
+                        : 'text-gray-600 hover:bg-yellow-50 hover:text-yellow-800'
                     }`
                   }
                 >
-                  <span className="text-lg">{menu.icon}</span>
+                  <span className="text-lg">
+                    {menu.icon}
+                  </span>
+
                   <span>{menu.name}</span>
                 </NavLink>
               ))}
             </div>
           </nav>
 
-          {/* Footer */}
+          {/* Informasi */}
           <div className="border-t p-4">
             <div className="rounded-xl bg-yellow-50 p-4">
-              <p className="text-sm font-semibold text-yellow-700">
-                Lost & Found
+              <p className="text-sm font-semibold text-yellow-800">
+                Lost &amp; Found
               </p>
+
               <p className="mt-1 text-xs text-gray-500">
                 Temukan dan laporkan barang yang hilang.
               </p>
             </div>
           </div>
+
         </div>
       </aside>
     </>

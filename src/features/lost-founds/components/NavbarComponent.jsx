@@ -13,13 +13,16 @@ function NavbarComponent({
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200 bg-white/95 backdrop-blur">
       <div className="flex h-[72px] items-center justify-between px-4 md:px-6">
-        
+
         <div className="flex items-center gap-3">
+          {/* Tombol menu mobile */}
           <button
+            type="button"
             onClick={onMenuClick}
+            aria-label="Buka menu navigasi"
             className="rounded-xl p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
           >
-            <IconMenu2 size={23} />
+            <IconMenu2 size={23} aria-hidden="true" />
           </button>
 
           <div className="flex items-center gap-3">
@@ -40,12 +43,25 @@ function NavbarComponent({
         </div>
 
         <div className="flex items-center gap-2">
-          <button className="rounded-xl p-2.5 text-slate-500 hover:bg-slate-100">
-            <IconBell size={21} />
+
+          {/* Tombol notifikasi */}
+          <button
+            type="button"
+            aria-label="Notifikasi"
+            className="rounded-xl p-2.5 text-slate-500 hover:bg-slate-100"
+          >
+            <IconBell
+              size={21}
+              aria-hidden="true"
+            />
           </button>
 
+          {/* Profil pengguna */}
           <div className="hidden items-center gap-2 border-l border-slate-200 pl-3 sm:flex">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-100 text-yellow-700">
+            <div
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-yellow-100 text-yellow-700"
+              aria-hidden="true"
+            >
               <IconUserCircle size={22} />
             </div>
 
@@ -60,13 +76,20 @@ function NavbarComponent({
             </div>
           </div>
 
+          {/* Tombol logout */}
           <button
+            type="button"
             onClick={onLogout}
+            aria-label="Keluar dari akun"
+            title="Keluar dari akun"
             className="rounded-xl p-2.5 text-slate-500 hover:bg-red-50 hover:text-red-600"
-            title="Logout"
           >
-            <IconLogout size={20} />
+            <IconLogout
+              size={20}
+              aria-hidden="true"
+            />
           </button>
+
         </div>
       </div>
     </header>
