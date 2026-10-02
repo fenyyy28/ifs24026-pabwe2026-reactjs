@@ -16,7 +16,6 @@ function LostFoundLayout() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-
       <NavbarComponent
         onMenuClick={() => setSidebarOpen(true)}
       />
@@ -34,7 +33,6 @@ function LostFoundLayout() {
           <Outlet />
         </div>
       </main>
-
     </div>
   )
 }
