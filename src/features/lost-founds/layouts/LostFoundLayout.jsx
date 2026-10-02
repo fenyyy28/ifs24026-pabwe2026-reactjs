@@ -1,5 +1,5 @@
-import { Outlet } from 'react-router-dom'
 import { useState } from 'react'
+import { Outlet } from 'react-router-dom'
 
 import NavbarComponent from '../components/NavbarComponent'
 import SidebarComponent from '../components/SidebarComponent'
@@ -7,15 +7,21 @@ import SidebarComponent from '../components/SidebarComponent'
 function LostFoundLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
+  function handleOpenSidebar() {
+    setSidebarOpen(true)
+  }
+
+  function handleCloseSidebar() {
+    setSidebarOpen(false)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50">
-      <NavbarComponent
-        onMenuClick={() => setSidebarOpen(true)}
-      />
+      <NavbarComponent onMenuClick={handleOpenSidebar} />
 
       <SidebarComponent
         open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
+        onClose={handleCloseSidebar}
       />
 
       <main

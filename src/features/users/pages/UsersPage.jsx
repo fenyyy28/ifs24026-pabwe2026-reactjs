@@ -19,7 +19,7 @@ export default function UsersPage() {
   }, [dispatch])
 
   return (
-    <main className="min-h-screen bg-yellow-50 p-6">
+    <div className="min-h-screen bg-yellow-50 p-6">
       <div className="mx-auto max-w-6xl">
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-yellow-800">
@@ -96,6 +96,6 @@ export default function UsersPage() {
             </div>
           )}
       </div>
-    </main>
+    </div>
   )
 }

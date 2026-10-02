@@ -188,26 +188,26 @@ export default function ProfilePage() {
 
   if (isLoading && !profile) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-yellow-50">
+      <div className="flex min-h-screen items-center justify-center bg-yellow-50">
         <p className="text-gray-500">
           Memuat profil...
         </p>
-      </main>
+      </div>
     )
   }
 
   if (error && !profile) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-yellow-50 p-6">
+      <div className="flex min-h-screen items-center justify-center bg-yellow-50 p-6">
         <div className="rounded-2xl bg-red-50 p-6 text-red-700">
           {error}
         </div>
-      </main>
+      </div>
     )
   }
 
   return (
-    <main className="min-h-screen bg-yellow-50 p-6">
+    <div className="min-h-screen bg-yellow-50 p-6">
       <div className="mx-auto max-w-4xl">
         <div className="mb-8">
           <p className="text-sm font-semibold uppercase tracking-wide text-yellow-800">
@@ -372,6 +372,6 @@ export default function ProfilePage() {
           </form>
         </section>
       </div>
-    </main>
+    </div>
   )
 }

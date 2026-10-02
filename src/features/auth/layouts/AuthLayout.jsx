@@ -9,7 +9,7 @@ export default function AuthLayout() {
   }
 
   return (
-    <main className="min-h-screen bg-yellow-50 p-4">
+    <div className="min-h-screen bg-yellow-50 p-4">
       <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl items-center justify-center">
         <div className="grid w-full overflow-hidden rounded-3xl bg-white shadow-xl md:grid-cols-2">
 
@@ -36,6 +36,6 @@ export default function AuthLayout() {
 
         </div>
       </div>
-    </main>
+    </div>
   )
 }
