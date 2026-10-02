@@ -1,41 +1,39 @@
-import { Navigate, Outlet } from 'react-router-dom'
-import { useSelector } from 'react-redux'
+import { Outlet } from 'react-router-dom'
 
-export default function AuthLayout() {
-  const token = useSelector((state) => state.auth.token)
-
-  if (token) {
-    return <Navigate to="/" replace />
-  }
-
+function AuthLayout() {
   return (
-    <div className="min-h-screen bg-yellow-50 p-4">
-      <div className="mx-auto flex min-h-[calc(100vh-2rem)] max-w-6xl items-center justify-center">
-        <div className="grid w-full overflow-hidden rounded-3xl bg-white shadow-xl md:grid-cols-2">
-
+    <div className="min-h-screen bg-yellow-50">
+      <main
+        className="min-h-screen"
+        aria-label="Halaman autentikasi"
+      >
+        <div className="grid min-h-screen md:grid-cols-2">
           <div className="hidden bg-yellow-400 p-10 md:flex md:flex-col md:justify-center">
-            <p className="mb-3 text-sm font-semibold uppercase tracking-wider text-yellow-950">
-              Lost & Founds
-            </p>
+            <div className="mx-auto max-w-md">
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-yellow-900">
+                Lost &amp; Founds
+              </p>
 
-            <h1 className="text-4xl font-extrabold leading-tight text-yellow-950">
-              Temukan barang yang hilang.
-            </h1>
+              <h1 className="text-4xl font-extrabold leading-tight text-yellow-950">
+                Temukan kembali barang yang hilang.
+              </h1>
 
-            <p className="mt-5 text-yellow-900">
-              Laporkan barang hilang atau barang temuan
-              dengan mudah melalui satu aplikasi.
-            </p>
+              <p className="mt-5 text-base leading-7 text-yellow-900">
+                Laporkan barang yang hilang atau temukan barang yang
+                dilaporkan oleh pengguna lain dengan mudah.
+              </p>
+            </div>
           </div>
 
-          <div className="flex items-center justify-center p-6 sm:p-10">
+          <div className="flex min-h-screen items-center justify-center bg-white p-6">
             <div className="w-full max-w-md">
               <Outlet />
             </div>
           </div>
-
         </div>
-      </div>
+      </main>
     </div>
   )
 }
+
+export default AuthLayout

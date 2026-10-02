@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
 
 import { isAuthRegister } from '../states/authThunks'
+
 import {
   showErrorDialog,
   showSuccessDialog,
@@ -12,9 +13,7 @@ export default function RegisterPage() {
   const dispatch = useDispatch()
   const navigate = useNavigate()
 
-  const { isLoading } = useSelector(
-    (state) => state.auth,
-  )
+  const { isLoading } = useSelector((state) => state.auth)
 
   const [form, setForm] = useState({
     name: '',
@@ -48,23 +47,20 @@ export default function RegisterPage() {
 
     if (!form.email.trim()) {
       newErrors.email = 'Email wajib diisi.'
-    } else if (!/\S+@\S+\.\S+/.test(form.email)) {
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
       newErrors.email = 'Format email tidak valid.'
     }
 
     if (!form.password) {
       newErrors.password = 'Password wajib diisi.'
     } else if (form.password.length < 6) {
-      newErrors.password =
-        'Password minimal 6 karakter.'
+      newErrors.password = 'Password minimal 6 karakter.'
     }
 
     if (!form.confirmPassword) {
       newErrors.confirmPassword =
         'Konfirmasi password wajib diisi.'
-    } else if (
-      form.password !== form.confirmPassword
-    ) {
+    } else if (form.password !== form.confirmPassword) {
       newErrors.confirmPassword =
         'Konfirmasi password tidak sama.'
     }
@@ -112,25 +108,27 @@ export default function RegisterPage() {
         </h2>
 
         <p className="mt-2 text-gray-500">
-          Daftar untuk mulai menggunakan Lost & Founds.
+          Daftar untuk mulai menggunakan Lost &amp; Founds.
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4"
-      >
+      <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="register-name-input"
+            className="mb-2 block text-sm font-semibold text-gray-700"
+          >
             Nama
           </label>
 
           <input
+            id="register-name-input"
             type="text"
             name="name"
             value={form.name}
             onChange={handleChange}
             placeholder="Nama lengkap"
+            autoComplete="name"
             className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
           />
 
@@ -142,16 +140,21 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="register-email-input"
+            className="mb-2 block text-sm font-semibold text-gray-700"
+          >
             Email
           </label>
 
           <input
+            id="register-email-input"
             type="email"
             name="email"
             value={form.email}
             onChange={handleChange}
             placeholder="nama@email.com"
+            autoComplete="email"
             className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
           />
 
@@ -163,16 +166,21 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="register-password-input"
+            className="mb-2 block text-sm font-semibold text-gray-700"
+          >
             Password
           </label>
 
           <input
+            id="register-password-input"
             type="password"
             name="password"
             value={form.password}
             onChange={handleChange}
             placeholder="Minimal 6 karakter"
+            autoComplete="new-password"
             className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
           />
 
@@ -184,16 +192,21 @@ export default function RegisterPage() {
         </div>
 
         <div>
-          <label className="mb-2 block text-sm font-semibold text-gray-700">
+          <label
+            htmlFor="register-confirm-password-input"
+            className="mb-2 block text-sm font-semibold text-gray-700"
+          >
             Konfirmasi Password
           </label>
 
           <input
+            id="register-confirm-password-input"
             type="password"
             name="confirmPassword"
             value={form.confirmPassword}
             onChange={handleChange}
             placeholder="Ulangi password"
+            autoComplete="new-password"
             className="w-full rounded-xl border border-gray-200 px-4 py-3 outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-100"
           />
 
@@ -215,8 +228,9 @@ export default function RegisterPage() {
 
       <p className="mt-5 text-center text-sm text-gray-500">
         Sudah punya akun?{' '}
+
         <Link
-          to="/login"
+          to="/auth/login"
           className="font-bold text-yellow-800 hover:text-yellow-700"
         >
           Masuk

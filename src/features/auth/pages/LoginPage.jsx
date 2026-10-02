@@ -53,9 +53,7 @@ export default function LoginPage() {
   async function handleSubmit(event) {
     event.preventDefault()
 
-    if (!validate()) {
-      return
-    }
+    if (!validate()) return
 
     const result = await dispatch(isAuthLogin(form))
 
@@ -81,11 +79,7 @@ export default function LoginPage() {
         </p>
       </div>
 
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-5"
-      >
-        {/* Email */}
+      <form onSubmit={handleSubmit} className="space-y-5">
         <div>
           <label
             htmlFor="login-email-input"
@@ -112,7 +106,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Password */}
         <div>
           <label
             htmlFor="login-password-input"
@@ -139,7 +132,6 @@ export default function LoginPage() {
           )}
         </div>
 
-        {/* Tombol Login */}
         <button
           id="login-submit-button"
           type="submit"
@@ -152,10 +144,9 @@ export default function LoginPage() {
 
       <p className="mt-6 text-center text-sm text-gray-500">
         Belum punya akun?{' '}
-
         <Link
           to="/auth/register"
-     className="font-bold text-yellow-800 hover:text-yellow-900"
+          className="font-bold text-yellow-800 hover:text-yellow-900"
         >
           Daftar sekarang
         </Link>
