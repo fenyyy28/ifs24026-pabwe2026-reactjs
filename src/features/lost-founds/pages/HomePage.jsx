@@ -98,28 +98,28 @@ function HomePage() {
       value: total,
       icon: IconPackage,
       bg: 'bg-yellow-100',
-      text: 'text-yellow-700',
+      text: 'text-yellow-800',
     },
     {
       label: 'Barang Hilang',
       value: lost,
       icon: IconAlertTriangle,
       bg: 'bg-red-100',
-      text: 'text-red-600',
+      text: 'text-red-700',
     },
     {
       label: 'Barang Ditemukan',
       value: found,
       icon: IconBox,
       bg: 'bg-blue-100',
-      text: 'text-blue-600',
+      text: 'text-blue-700',
     },
     {
       label: 'Selesai',
       value: completed,
       icon: IconCheck,
       bg: 'bg-green-100',
-      text: 'text-green-600',
+      text: 'text-green-700',
     },
   ]
 
@@ -130,14 +130,16 @@ function HomePage() {
   return (
     <>
       <div className="mx-auto max-w-7xl space-y-6">
+
+        {/* Header */}
         <section className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <p className="text-sm font-semibold text-yellow-600">
+            <p className="text-sm font-semibold text-yellow-800">
               Dashboard
             </p>
 
             <h2 className="mt-1 text-3xl font-black tracking-tight text-slate-900">
-              Lost & Founds
+              Lost &amp; Founds
             </h2>
 
             <p className="mt-1 text-slate-500">
@@ -146,14 +148,16 @@ function HomePage() {
           </div>
 
           <button
+            type="button"
             onClick={() => setModalOpen(true)}
             className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-5 py-3 font-bold text-slate-900 shadow-sm hover:bg-yellow-300"
           >
-            <IconPlus size={20} />
+            <IconPlus size={20} aria-hidden="true" />
             Tambah Laporan
           </button>
         </section>
 
+        {/* Statistik */}
         <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((item) => {
             const Icon = item.icon
@@ -177,7 +181,7 @@ function HomePage() {
                   <div
                     className={`flex h-11 w-11 items-center justify-center rounded-xl ${item.bg} ${item.text}`}
                   >
-                    <Icon size={22} />
+                    <Icon size={22} aria-hidden="true" />
                   </div>
                 </div>
               </div>
@@ -185,11 +189,14 @@ function HomePage() {
           })}
         </section>
 
+        {/* Search dan Filter */}
         <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+
             <div className="relative flex-1">
               <IconSearch
                 size={19}
+                aria-hidden="true"
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
               />
 
@@ -197,14 +204,17 @@ function HomePage() {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Cari laporan..."
+                aria-label="Cari laporan"
                 className="w-full rounded-xl border border-slate-200 py-3 pl-11 pr-4 outline-none focus:border-yellow-400 focus:ring-4 focus:ring-yellow-100"
               />
             </div>
 
             <div className="flex flex-col gap-3 sm:flex-row">
+
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
+                aria-label="Filter jenis barang"
                 className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none"
               >
                 <option value="all">Semua Jenis</option>
@@ -215,16 +225,19 @@ function HomePage() {
               <select
                 value={completedFilter}
                 onChange={(e) => setCompletedFilter(e.target.value)}
+                aria-label="Filter status barang"
                 className="rounded-xl border border-slate-200 px-4 py-3 text-sm font-semibold outline-none"
               >
                 <option value="all">Semua Status</option>
                 <option value="0">Belum Selesai</option>
                 <option value="1">Selesai</option>
               </select>
+
             </div>
           </div>
         </section>
 
+        {/* Daftar laporan */}
         <section>
           <div className="mb-4 flex items-center justify-between">
             <div>
@@ -246,8 +259,10 @@ function HomePage() {
             </div>
           ) : filteredData.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-slate-300 bg-white p-12 text-center">
+
               <IconPackage
                 size={42}
+                aria-hidden="true"
                 className="mx-auto text-slate-300"
               />
 
@@ -267,6 +282,7 @@ function HomePage() {
                   className="overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-md"
                 >
                   <div className="relative h-44 bg-slate-100">
+
                     {item.cover ? (
                       <img
                         src={`https://open-api.delcom.org/${item.cover}`}
@@ -277,6 +293,7 @@ function HomePage() {
                       <div className="flex h-full items-center justify-center">
                         <IconPackage
                           size={44}
+                          aria-hidden="true"
                           className="text-slate-300"
                         />
                       </div>
@@ -285,8 +302,8 @@ function HomePage() {
                     <span
                       className={`absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-bold ${
                         item.status === 'lost'
-                          ? 'bg-red-100 text-red-600'
-                          : 'bg-green-100 text-green-600'
+                          ? 'bg-red-100 text-red-700'
+                          : 'bg-green-100 text-green-700'
                       }`}
                     >
                       {item.status === 'lost'
@@ -295,7 +312,7 @@ function HomePage() {
                     </span>
 
                     {Number(item.is_completed) === 1 && (
-                      <span className="absolute right-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold text-green-600 shadow">
+                      <span className="absolute right-3 top-3 rounded-full bg-white px-3 py-1 text-xs font-bold text-green-700 shadow">
                         Selesai
                       </span>
                     )}
@@ -322,12 +339,14 @@ function HomePage() {
                       </div>
 
                       <button
+                        type="button"
                         onClick={() =>
                           navigate(`/lost-founds/${item.id}`)
                         }
+                        aria-label={`Lihat detail ${item.title}`}
                         className="inline-flex items-center gap-2 rounded-xl bg-slate-100 px-3 py-2 text-sm font-bold text-slate-700 hover:bg-yellow-100"
                       >
-                        <IconEye size={17} />
+                        <IconEye size={17} aria-hidden="true" />
                         Detail
                       </button>
                     </div>
@@ -338,9 +357,10 @@ function HomePage() {
           )}
         </section>
 
+        {/* Statistik harian */}
         {lostFoundStats?.daily && (
           <section className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm">
-            <h3 className="text-lg font-extrabold">
+            <h3 className="text-lg font-extrabold text-slate-900">
               Statistik Harian
             </h3>
 
@@ -358,11 +378,11 @@ function HomePage() {
                     key={date}
                     className="rounded-xl bg-slate-50 p-4"
                   >
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs text-slate-500">
                       {date}
                     </p>
 
-                    <p className="mt-1 text-2xl font-black">
+                    <p className="mt-1 text-2xl font-black text-slate-900">
                       {value}
                     </p>
 
