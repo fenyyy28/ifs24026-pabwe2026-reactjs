@@ -30,25 +30,11 @@ const ProfilePage = lazy(
 
 function LoadingPage() {
   return (
-    <main
-      className="flex min-h-screen items-center justify-center bg-gray-50"
-      aria-label="Memuat halaman"
-    >
-      <div className="text-center">
-        <h1 className="sr-only">
-          Lost &amp; Founds
-        </h1>
-
-        <div
-          className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-yellow-200 border-t-yellow-500"
-          aria-hidden="true"
-        />
-
-        <p className="text-sm font-medium text-gray-500">
-          Memuat halaman...
-        </p>
-      </div>
-    </main>
+    <div className="flex min-h-screen items-center justify-center bg-gray-50">
+      <p className="text-sm font-medium text-gray-500">
+        Memuat halaman...
+      </p>
+    </div>
   )
 }
 
@@ -56,8 +42,10 @@ function App() {
   return (
     <Suspense fallback={<LoadingPage />}>
       <Routes>
-        {/* Authentication */}
-        <Route path="/auth" element={<AuthLayout />}>
+        <Route
+          path="/auth"
+          element={<AuthLayout />}
+        >
           <Route
             path="login"
             element={<LoginPage />}
@@ -69,8 +57,10 @@ function App() {
           />
         </Route>
 
-        {/* Main application */}
-        <Route path="/" element={<LostFoundLayout />}>
+        <Route
+          path="/"
+          element={<LostFoundLayout />}
+        >
           <Route
             index
             element={<HomePage />}
@@ -92,7 +82,6 @@ function App() {
           />
         </Route>
 
-        {/* Halaman yang tidak ditemukan */}
         <Route
           path="*"
           element={
