@@ -9,6 +9,9 @@ pipeline {
 
     environment {
         APP_NAME = 'ifs24026-pabwe2026-reactjs'
+        URL_REDEPLOY = 'https://delcom-job-api.delcom.org/api/v1/deployments/redeploy'
+        URL_PROGRESS = 'https://delcom-job-api.delcom.org/api/v1/deployments'
+        WEBSITE_ID = 'ifs24026-pabwe2026-reactjs'
     }
 
     stages {
@@ -20,6 +23,7 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 checkout scm
             }
@@ -32,6 +36,7 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
                     set -e
@@ -56,6 +61,7 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
                     set -e
@@ -67,13 +73,15 @@ pipeline {
                     echo "=== Environment ==="
                     echo "NODE_ENV=${NODE_ENV:-not-set}"
 
-                    echo "=== Installing Dependencies ==="
                     unset NODE_ENV
 
+                    echo "=== Installing Dependencies ==="
                     bun install --frozen-lockfile
 
-                    echo "=== Checking Coverage Dependency ==="
+                    echo "=== Checking Vitest ==="
+                    bun pm ls vitest
 
+                    echo "=== Checking Coverage Dependency ==="
                     bun pm ls @vitest/coverage-v8
 
                     if [ ! -d "node_modules/@vitest/coverage-v8" ]; then
@@ -83,9 +91,11 @@ pipeline {
 
                     echo "=== Coverage Dependency Found ==="
 
-                    echo "=== Running Tests with Coverage ==="
+                    echo "=== Running Vitest in Single Fork ==="
 
-                    bun run vitest run --coverage --pool=threads
+                    bun run vitest run --coverage \
+                        --pool=forks \
+                        --poolOptions.forks.singleFork=true
 
                     echo "=== Tests Passed ==="
                 '''
@@ -99,6 +109,7 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
                     set -e
@@ -108,10 +119,12 @@ pipeline {
                     echo "======================================"
 
                     trivy fs \
-                        --scanners vuln,secret \
                         --exit-code 0 \
-                        --no-progress \
+                        --severity HIGH,CRITICAL \
+                        --ignore-unfixed \
                         .
+
+                    echo "=== Trivy Scan Completed ==="
                 '''
             }
         }
@@ -123,6 +136,7 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 withSonarQubeEnv('SonarQube') {
                     sh '''
@@ -132,7 +146,13 @@ pipeline {
                         echo "       SONARQUBE ANALYSIS"
                         echo "======================================"
 
-                        sonar-scanner
+                        sonar-scanner \
+                            -Dsonar.projectKey=${APP_NAME} \
+                            -Dsonar.projectName=${APP_NAME} \
+                            -Dsonar.sources=. \
+                            -Dsonar.exclusions=node_modules/**,coverage/**,.git/**
+
+                        echo "=== SonarQube Analysis Completed ==="
                     '''
                 }
             }
@@ -140,9 +160,15 @@ pipeline {
 
         stage('Quality Gate') {
             steps {
+                echo "======================================"
+                echo "          QUALITY GATE"
+                echo "======================================"
+
                 timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: true
                 }
+
+                echo "=== Quality Gate Passed ==="
             }
         }
 
@@ -153,6 +179,7 @@ pipeline {
                     reuseNode true
                 }
             }
+
             steps {
                 sh '''
                     set -e
@@ -171,7 +198,7 @@ pipeline {
                         -x ".trivy-cache/*" \
                         -x "latest-app.zip"
 
-                    echo "=== Application Packaged ==="
+                    echo "=== Package Created ==="
                     ls -lh latest-app.zip
                 '''
             }
@@ -181,22 +208,29 @@ pipeline {
             steps {
                 script {
                     def buildId = env.BUILD_NUMBER
+                    def appName = env.APP_NAME
 
                     echo "======================================"
                     echo "       PUBLISH APPLICATION"
                     echo "======================================"
 
+                    echo "Application : ${appName}"
                     echo "Build Number: ${buildId}"
 
                     sh """
+                        set -e
+
                         docker cp latest-app.zip \
-                        cicd-jenkins:/var/jenkins_home/userContent/applications/${APP_NAME}/${buildId}/latest-app.zip
+                            cicd-jenkins:/var/jenkins_home/userContent/applications/${appName}/${buildId}/latest-app.zip
                     """
 
                     env.ARTIFACT_URL =
-                        "https://jenkins.delcom.org/userContent/applications/${APP_NAME}/${buildId}/latest-app.zip"
+                        "https://jenkins.delcom.org/userContent/applications/${appName}/${buildId}/latest-app.zip"
 
-                    echo "Artifact URL: ${env.ARTIFACT_URL}"
+                    echo "Artifact URL:"
+                    echo "${env.ARTIFACT_URL}"
+
+                    echo "=== Application Published ==="
                 }
             }
         }
@@ -208,38 +242,42 @@ pipeline {
                     reuseNode true
                 }
             }
-            environment {
-                URL_REDEPLOY = credentials('URL_REDEPLOY')
-                DEPLOY_TOKEN = credentials('DEPLOY_TOKEN')
-                WEBSITE_ID = credentials('WEBSITE_ID')
-            }
+
             steps {
-                sh '''
-                    set -e
+                withCredentials([
+                    string(
+                        credentialsId: 'deploy-token',
+                        variable: 'DEPLOY_TOKEN'
+                    )
+                ]) {
+                    sh '''
+                        set -e
 
-                    echo "======================================"
-                    echo "       DEPLOY APPLICATION"
-                    echo "======================================"
+                        echo "======================================"
+                        echo "       DEPLOYING APPLICATION"
+                        echo "======================================"
 
-                    echo "Artifact URL:"
-                    echo "${ARTIFACT_URL}"
+                        echo "Application : ${APP_NAME}"
+                        echo "Website ID  : ${WEBSITE_ID}"
+                        echo "Artifact    : ${ARTIFACT_URL}"
 
-                    echo "Starting deployment..."
+                        echo "=== Starting Deployment ==="
 
-                    RESPONSE=$(curl -s -X POST \
-                        "${URL_REDEPLOY}" \
-                        -H "Authorization: Bearer ${DEPLOY_TOKEN}" \
-                        -H "Content-Type: application/json" \
-                        -d "{
-                            \\"website_id\\": \\"${WEBSITE_ID}\\",
-                            \\"artifact_url\\": \\"${ARTIFACT_URL}\\"
-                        }")
+                        RESPONSE=$(curl -sS -X POST \
+                            "${URL_REDEPLOY}" \
+                            -H "Authorization: Bearer ${DEPLOY_TOKEN}" \
+                            -H "Content-Type: application/json" \
+                            -d "{
+                                \\"website_id\\": \\"${WEBSITE_ID}\\",
+                                \\"artifact_url\\": \\"${ARTIFACT_URL}\\"
+                            }")
 
-                    echo "Deployment response:"
-                    echo "${RESPONSE}"
+                        echo "Deployment Response:"
+                        echo "${RESPONSE}"
 
-                    echo "=== Deployment Triggered ==="
-                '''
+                        echo "=== Deployment Request Sent ==="
+                    '''
+                }
             }
         }
     }
@@ -252,17 +290,22 @@ pipeline {
 
             echo "Build Number: ${env.BUILD_NUMBER}"
             echo "Result: ${currentBuild.result ?: 'SUCCESS'}"
+        }
 
+        success {
+            echo "======================================"
+            echo "       CI/CD PIPELINE SUCCESS"
             echo "======================================"
 
-            script {
-                if (currentBuild.result == 'SUCCESS') {
-                    echo "       CI/CD PIPELINE SUCCESS"
-                } else {
-                    echo "       CI/CD PIPELINE FAILED"
-                    echo "Periksa stage yang berwarna merah."
-                }
-            }
+            echo "Semua stage berhasil."
+        }
+
+        failure {
+            echo "======================================"
+            echo "       CI/CD PIPELINE FAILED"
+            echo "======================================"
+
+            echo "Periksa stage yang berwarna merah."
         }
     }
 }
