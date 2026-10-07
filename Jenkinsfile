@@ -5,6 +5,7 @@ pipeline {
     options {
         timestamps()
         skipDefaultCheckout(true)
+        // Stop later stages if a publisher marks the build UNSTABLE/FAILURE mid-run
         skipStagesAfterUnstable()
     }
 
@@ -41,13 +42,9 @@ pipeline {
                 sh '''
                     set -e
 
-                    echo "======================================"
-                    echo "       INSTALLING DEPENDENCIES"
-                    echo "======================================"
+                    echo "=== Installing Dependencies ==="
 
-                    unset NODE_ENV
-
-                    bun install --frozen-lockfile
+                    bun install
 
                     echo "=== Dependencies Installed ==="
                 '''
@@ -69,41 +66,11 @@ pipeline {
                 sh '''
                     set -e
 
-                    echo "======================================"
-                    echo "       RUNNING TESTS WITH COVERAGE"
-                    echo "======================================"
+                    echo "=== Running Tests with Coverage ==="
 
-                    echo "=== Node Version ==="
-                    node --version
-
-                    echo "=== NPM Version ==="
-                    npm --version
-
-                    echo "=== Checking Vitest ==="
-                    node_modules/.bin/vitest --version
-
-                    echo "=== Checking Coverage Dependency ==="
-
-                    if [ ! -d "node_modules/@vitest/coverage-v8" ]; then
-                        echo "ERROR: @vitest/coverage-v8 tidak ditemukan!"
-                        exit 1
-                    fi
-
-                    echo "=== Coverage Dependency Found ==="
-
-                    echo "=== Running Vitest with Node.js ==="
-
-                    node_modules/.bin/vitest run --coverage
+                    npx vitest run --coverage
 
                     echo "=== Tests Passed ==="
-
-                    echo "=== Coverage Directory ==="
-
-                    if [ -d "coverage" ]; then
-                        ls -lah coverage
-                    else
-                        echo "WARNING: coverage directory tidak ditemukan."
-                    fi
                 '''
             }
         }
@@ -150,13 +117,15 @@ pipeline {
                         .
 
                     echo "=== Trivy Result ==="
-
                     ls -lh trivy-results.sarif
                 '''
             }
 
             post {
                 always {
+                    // failOnError must be false: otherwise Warnings NG can mark the
+                    // whole build FAILURE while later stages still run (all green, badge red).
+                    // Build failure on HIGH/CRITICAL comes from trivy --exit-code 1 above.
                     recordIssues(
                         enabledForFailure: true,
                         failOnError: false,
@@ -189,9 +158,7 @@ pipeline {
                     sh '''
                         set -e
 
-                        echo "======================================"
-                        echo "        SONARQUBE ANALYSIS"
-                        echo "======================================"
+                        echo "=== SonarQube Analysis ==="
 
                         sonar-scanner
 
@@ -242,9 +209,12 @@ pipeline {
                         -x ".env" \
                         -x ".env.*" \
                         -x "coverage/*" \
+                        -x ".next/*" \
+                        -x "out/*" \
                         -x ".trivy-cache/*" \
                         -x "latest-app.zip" \
-                        -x "trivy-results.sarif"
+                        -x "trivy-results.sarif" \
+                        -x ".docs/*"
 
                     echo "=== Application Package Created ==="
 
@@ -264,13 +234,9 @@ pipeline {
 
             steps {
 
-                echo "======================================"
-                echo "       PUBLISHING APPLICATION"
-                echo "======================================"
-
-                // ====================================================
+                // ========================================================
                 // 1. ARCHIVE ARTIFACT KE JENKINS
-                // ====================================================
+                // ========================================================
 
                 archiveArtifacts(
                     artifacts: 'latest-app.zip',
@@ -462,30 +428,35 @@ pipeline {
 
                             echo ""
                             echo "=========================================="
-                            echo "       DEPLOYMENT SUCCESS"
+                            echo "       ✅ DEPLOYMENT SUCCESS"
                             echo "=========================================="
 
                             break
                         }
 
                         // ==================================================
-                        // FAILED
+                        // FAIL
                         // ==================================================
 
-                        if (
-                            deploymentStatus == 'FAILED' ||
-                            deploymentStatus == 'FAILURE' ||
-                            deploymentStatus == 'ERROR'
-                        ) {
+                        if (deploymentStatus == 'FAIL') {
 
                             echo ""
                             echo "=========================================="
-                            echo "       DEPLOYMENT FAILED"
+                            echo "       ❌ DEPLOYMENT FAILED"
                             echo "=========================================="
 
+                            def deploymentLog =
+                                json?.data?.log
+                                    ?: 'Deployment failed tanpa log.'
+
+                            echo ""
+                            echo "========== DEPLOYMENT LOG =========="
+                            echo deploymentLog
+                            echo "===================================="
+
                             error(
-                                "Deployment gagal dengan status: " +
-                                deploymentStatus
+                                "Deployment gagal untuk website " +
+                                "${WEBSITE_ID}"
                             )
                         }
 
@@ -510,55 +481,35 @@ pipeline {
     // ================================================================
     post {
 
+        always {
+            archiveArtifacts(
+                artifacts: 'trivy-results.sarif',
+                allowEmptyArchive: true
+            )
+        }
+
         success {
-            echo ""
-            echo "======================================"
-            echo "       CI/CD PIPELINE SUCCESS"
-            echo "======================================"
-
-            echo "Build Number: ${env.BUILD_NUMBER}"
+            echo "=========================================="
+            echo "       ✅ PIPELINE SUCCESS"
+            echo "=========================================="
             echo "Result: ${currentBuild.currentResult}"
-
-            echo "======================================"
-            echo "       APPLICATION DEPLOYED"
-            echo "======================================"
-
-            echo "Artifact URL:"
-            echo "${env.ARTIFACT_URL}"
+            echo "📦 Artifact: ${env.ARTIFACT_URL ?: '(not published)'}"
+            echo "🚀 Website berhasil dideploy."
         }
 
         failure {
-            echo ""
-            echo "======================================"
-            echo "       CI/CD PIPELINE FAILED"
-            echo "======================================"
-
-            echo "Build Number: ${env.BUILD_NUMBER}"
+            echo "=========================================="
+            echo "       ❌ PIPELINE FAILED"
+            echo "=========================================="
             echo "Result: ${currentBuild.currentResult}"
-
-            echo "Periksa stage yang berwarna merah."
+            echo "Periksa log stage yang merah / Console Output untuk penyebab gagal."
         }
 
         unstable {
-            echo ""
-            echo "======================================"
-            echo "       CI/CD PIPELINE UNSTABLE"
-            echo "======================================"
-
-            echo "Build Number: ${env.BUILD_NUMBER}"
+            echo "=========================================="
+            echo "       ⚠️ PIPELINE UNSTABLE"
+            echo "=========================================="
             echo "Result: ${currentBuild.currentResult}"
-        }
-
-        always {
-            echo ""
-            echo "======================================"
-            echo "       PIPELINE FINISHED"
-            echo "======================================"
-
-            echo "Build Number: ${env.BUILD_NUMBER}"
-            echo "Result: ${currentBuild.currentResult}"
-
-            echo "======================================"
         }
     }
 }
