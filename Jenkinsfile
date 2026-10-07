@@ -5,8 +5,6 @@ pipeline {
     options {
         timestamps()
         skipDefaultCheckout(true)
-
-        // Stop later stages if a publisher marks the build UNSTABLE/FAILURE mid-run
         skipStagesAfterUnstable()
     }
 
@@ -16,7 +14,6 @@ pipeline {
         // CHECKOUT
         // ============================================================
         stage('Checkout') {
-
             agent {
                 docker {
                     image 'oven/bun:alpine'
@@ -34,7 +31,6 @@ pipeline {
         // INSTALL DEPENDENCIES
         // ============================================================
         stage('Install Dependencies') {
-
             agent {
                 docker {
                     image 'oven/bun:alpine'
@@ -46,9 +42,13 @@ pipeline {
                 sh '''
                     set -e
 
-                    echo "=== Installing Dependencies ==="
+                    echo "======================================"
+                    echo "       INSTALLING DEPENDENCIES"
+                    echo "======================================"
 
-                    bun install
+                    unset NODE_ENV
+
+                    bun install --frozen-lockfile
 
                     echo "=== Dependencies Installed ==="
                 '''
@@ -60,7 +60,6 @@ pipeline {
         // TEST
         // ============================================================
         stage('Test') {
-
             agent {
                 docker {
                     image 'oven/bun:alpine'
@@ -76,13 +75,28 @@ pipeline {
                     echo "       RUNNING TESTS WITH COVERAGE"
                     echo "======================================"
 
+                    echo "=== Environment ==="
+                    echo "NODE_ENV=${NODE_ENV:-not-set}"
+
                     echo "=== Installing Dependencies ==="
-                    bun install
+
+                    unset NODE_ENV
+
+                    bun install --frozen-lockfile
 
                     echo "=== Checking Coverage Dependency ==="
 
+                    bun pm ls @vitest/coverage-v8 || true
+
                     if [ ! -d "node_modules/@vitest/coverage-v8" ]; then
                         echo "ERROR: @vitest/coverage-v8 tidak ditemukan!"
+
+                        echo "=== package.json ==="
+                        grep -A 5 -B 5 '"@vitest/coverage-v8"' package.json || true
+
+                        echo "=== node_modules/@vitest ==="
+                        ls -la node_modules/@vitest/ || true
+
                         exit 1
                     fi
 
@@ -102,11 +116,9 @@ pipeline {
         // TRIVY SECURITY SCAN
         // ============================================================
         stage('Trivy Security Scan') {
-
             agent {
                 docker {
                     image 'aquasec/trivy:0.74.0'
-
                     reuseNode true
 
                     args '''
@@ -128,7 +140,6 @@ pipeline {
                     echo "======================================"
 
                     echo "=== Trivy Version ==="
-
                     trivy --version
 
                     echo "=== Trivy Scan ==="
@@ -143,21 +154,12 @@ pipeline {
                         .
 
                     echo "=== Trivy Result ==="
-
                     ls -lh trivy-results.sarif
                 '''
             }
 
             post {
                 always {
-
-                    // failOnError must be false:
-                    // otherwise Warnings NG can mark the whole build
-                    // FAILURE while later stages still run.
-                    //
-                    // Build failure on HIGH/CRITICAL comes from
-                    // trivy --exit-code 1 above.
-
                     recordIssues(
                         enabledForFailure: true,
                         failOnError: false,
@@ -178,7 +180,6 @@ pipeline {
         // SONARQUBE ANALYSIS
         // ============================================================
         stage('SonarQube Analysis') {
-
             agent {
                 docker {
                     image 'sonarsource/sonar-scanner-cli:latest'
@@ -188,13 +189,13 @@ pipeline {
             }
 
             steps {
-
                 withSonarQubeEnv('SonarQube') {
-
                     sh '''
                         set -e
 
-                        echo "=== SonarQube Analysis ==="
+                        echo "======================================"
+                        echo "       SONARQUBE ANALYSIS"
+                        echo "======================================"
 
                         sonar-scanner
 
@@ -209,11 +210,8 @@ pipeline {
         // QUALITY GATE
         // ============================================================
         stage('Quality Gate') {
-
             steps {
-
                 timeout(time: 30, unit: 'MINUTES') {
-
                     waitForQualityGate abortPipeline: true
                 }
             }
@@ -224,7 +222,6 @@ pipeline {
         // PACKAGE APPLICATION
         // ============================================================
         stage('Package Application') {
-
             agent {
                 docker {
                     image 'node:24-alpine'
@@ -234,7 +231,6 @@ pipeline {
             }
 
             steps {
-
                 sh '''
                     set -e
 
@@ -275,9 +271,9 @@ pipeline {
 
             steps {
 
-                // ========================================================
+                // ====================================================
                 // 1. ARCHIVE ARTIFACT KE JENKINS
-                // ========================================================
+                // ====================================================
 
                 archiveArtifacts(
                     artifacts: 'latest-app.zip',
@@ -355,7 +351,6 @@ pipeline {
         // DEPLOY APPLICATION
         // ============================================================
         stage('Deploy Application') {
-
             agent {
                 docker {
                     image 'curlimages/curl:8.15.0'
@@ -365,7 +360,6 @@ pipeline {
             }
 
             steps {
-
                 script {
 
                     echo "=========================================="
@@ -420,7 +414,6 @@ pipeline {
                         attempt++
 
                         if (attempt > maxAttempts) {
-
                             error(
                                 "Deployment timeout. " +
                                 "Status masih IN_PROGRESS setelah " +
@@ -463,7 +456,6 @@ pipeline {
                             ?.toUpperCase()
 
                         if (!deploymentStatus) {
-
                             error(
                                 "Response progress tidak memiliki data.status"
                             )
@@ -479,7 +471,6 @@ pipeline {
                         if (deploymentStatus == 'SUCCESS') {
 
                             echo ""
-
                             echo "=========================================="
                             echo "       DEPLOYMENT SUCCESS"
                             echo "=========================================="
@@ -492,17 +483,20 @@ pipeline {
                         // FAIL
                         // ==================================================
 
-                        if (deploymentStatus == 'FAIL') {
+                        if (
+                            deploymentStatus == 'FAIL' ||
+                            deploymentStatus == 'FAILED'
+                        ) {
 
                             echo ""
-
                             echo "=========================================="
-                            echo "       PIPELINE UNSTABLE"
+                            echo "       DEPLOYMENT FAILED"
                             echo "=========================================="
 
-                            echo "Result: ${currentBuild.currentResult}"
-
-                            break
+                            error(
+                                "Deployment gagal. " +
+                                "Status: ${deploymentStatus}"
+                            )
                         }
                     }
                 }
@@ -518,30 +512,30 @@ pipeline {
 
         always {
 
-            echo "=========================================="
-            echo "              PIPELINE FINISHED"
-            echo "=========================================="
+            echo "======================================"
+            echo "       PIPELINE FINISHED"
+            echo "======================================"
 
             echo "Build Number: ${env.BUILD_NUMBER}"
-            echo "Build Result: ${currentBuild.currentResult}"
+            echo "Result: ${currentBuild.currentResult}"
         }
 
         success {
 
-            echo "=========================================="
-            echo "          CI/CD PIPELINE SUCCESS"
-            echo "=========================================="
+            echo "======================================"
+            echo "       CI/CD PIPELINE SUCCESS"
+            echo "======================================"
 
             echo "Application berhasil melalui seluruh pipeline."
         }
 
         failure {
 
-            echo "=========================================="
-            echo "          CI/CD PIPELINE FAILED"
-            echo "=========================================="
+            echo "======================================"
+            echo "       CI/CD PIPELINE FAILED"
+            echo "======================================"
 
-            echo "Silakan cek stage yang berwarna merah."
+            echo "Periksa stage yang berwarna merah."
         }
     }
 }
